@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom colors for our emoji theme
+				emoji: {
+					yellow: "#fcef3c",
+					purple: "#5c14e0",
+					face: "#fcef3c", // The yellow face color
+					glasses: "#5c14e0", // The purple glasses color
+					nose: "#5c14e0", // The purple nose color
+					mouth: "#5c14e0" // The purple mouth color
 				}
 			},
 			borderRadius: {
@@ -84,11 +94,30 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				// Custom animations for the sunglasses
+				'sunglasses-rotate': {
+					'0%': { transform: 'rotate(0deg) translateY(0)' },
+					'25%': { transform: 'rotate(5deg) translateY(-5px)' },
+					'50%': { transform: 'rotate(0deg) translateY(0)' },
+					'75%': { transform: 'rotate(-5deg) translateY(-5px)' },
+					'100%': { transform: 'rotate(0deg) translateY(0)' }
+				},
+				'sunglasses-bounce': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'face-bounce': {
+					'0%, 100%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(1.05)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'sunglasses-rotate': 'sunglasses-rotate 4s ease-in-out infinite',
+				'sunglasses-bounce': 'sunglasses-bounce 2s ease-in-out infinite',
+				'face-bounce': 'face-bounce 4s ease-in-out infinite'
 			}
 		}
 	},
