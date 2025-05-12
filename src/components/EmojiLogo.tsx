@@ -9,6 +9,12 @@ interface EmojiLogoProps {
   trackMouse?: boolean;
 }
 
+interface ElementPosition {
+  x: number;
+  y: number;
+  rotation: number;
+}
+
 const EmojiLogo: React.FC<EmojiLogoProps> = ({ 
   className, 
   size = 'md', 
@@ -23,9 +29,23 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
   };
   
   const logoRef = useRef<HTMLDivElement>(null);
-  const [sunglassesPosition, setSunglassesPosition] = useState({ x: 0, y: 0 });
-  const [mouthPosition, setMouthPosition] = useState({ x: 0, y: 0 });
+  const [sunglassesPosition, setSunglassesPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
+  const [mouthPosition, setMouthPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
+  const [targetSunglassesPosition, setTargetSunglassesPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
+  const [targetMouthPosition, setTargetMouthPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
   
+  // Animation frame reference for smooth interpolation
+  const animationRef = useRef<number | null>(null);
+  
+  // Constants for movement
+  const SUNGLASSES_FACTOR = 0.6;
+  const MOUTH_FACTOR = 0.4;
+  const MAX_TRANSLATION = 10; // pixels
+  const MAX_SUNGLASSES_ROTATION = 5; // degrees
+  const MAX_MOUTH_ROTATION = 8; // degrees
+  const INTERPOLATION_SPEED = 0.08; // Lower = smoother but slower
+  
+  // Handle mouse movement to calculate target positions
   useEffect(() => {
     if (!trackMouse) return;
     
@@ -36,34 +56,62 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
+      // Normalized cursor position (-1 to 1)
+      const dx = (e.clientX - centerX) / (window.innerWidth / 2);
+      const dy = (e.clientY - centerY) / (window.innerHeight / 2);
       
-      // Calculate the angle between the mouse and the center of the logo
-      const angle = Math.atan2(mouseY - centerY, mouseX - centerX);
+      // Update target positions with translation and rotation
+      setTargetSunglassesPosition({
+        x: dx * MAX_TRANSLATION * SUNGLASSES_FACTOR,
+        y: dy * MAX_TRANSLATION * SUNGLASSES_FACTOR,
+        rotation: dx * MAX_SUNGLASSES_ROTATION * SUNGLASSES_FACTOR
+      });
       
-      // Calculate the maximum movement distance (% of logo size)
-      const maxDistance = 5;
-      const mouthMaxDistance = 2; // Less movement for the mouth
-      
-      // Calculate the new position with limited movement
-      const newX = Math.cos(angle) * maxDistance;
-      const newY = Math.sin(angle) * maxDistance;
-      
-      // Mouth moves with delay and less intensely
-      const mouthX = Math.cos(angle) * mouthMaxDistance;
-      const mouthY = Math.sin(angle) * mouthMaxDistance;
-      
-      setSunglassesPosition({ x: newX, y: newY });
-      setMouthPosition({ x: mouthX, y: mouthY });
+      setTargetMouthPosition({
+        x: dx * MAX_TRANSLATION * MOUTH_FACTOR,
+        y: dy * MAX_TRANSLATION * MOUTH_FACTOR,
+        rotation: dx * MAX_MOUTH_ROTATION * MOUTH_FACTOR
+      });
     };
     
     window.addEventListener('mousemove', handleMouseMove);
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
   }, [trackMouse]);
+  
+  // Smooth interpolation animation
+  useEffect(() => {
+    if (!trackMouse) return;
+    
+    const animate = () => {
+      setSunglassesPosition(prev => ({
+        x: prev.x + (targetSunglassesPosition.x - prev.x) * INTERPOLATION_SPEED,
+        y: prev.y + (targetSunglassesPosition.y - prev.y) * INTERPOLATION_SPEED,
+        rotation: prev.rotation + (targetSunglassesPosition.rotation - prev.rotation) * INTERPOLATION_SPEED
+      }));
+      
+      setMouthPosition(prev => ({
+        x: prev.x + (targetMouthPosition.x - prev.x) * INTERPOLATION_SPEED,
+        y: prev.y + (targetMouthPosition.y - prev.y) * INTERPOLATION_SPEED,
+        rotation: prev.rotation + (targetMouthPosition.rotation - prev.rotation) * INTERPOLATION_SPEED
+      }));
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animationRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [trackMouse, targetSunglassesPosition, targetMouthPosition]);
 
   return (
     <div 
@@ -84,7 +132,10 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
         )}
         style={
           trackMouse 
-            ? { transform: `translate(${sunglassesPosition.x}%, ${sunglassesPosition.y}%)` } 
+            ? { 
+                transform: `translate(${sunglassesPosition.x}px, ${sunglassesPosition.y}px) rotate(${sunglassesPosition.rotation}deg)`,
+                transition: 'transform 0.25s cubic-bezier(0.33, 1, 0.68, 1)' // Power3.out equivalent
+              } 
             : {}
         }
       >
@@ -97,10 +148,13 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
       
       {/* Custom Mouth */}
       <div 
-        className="absolute w-[40%] h-[30%] top-[65%] left-[30%] transition-transform duration-300"
+        className="absolute w-[40%] h-[30%] top-[65%] left-[30%]"
         style={
           trackMouse 
-            ? { transform: `translate(${mouthPosition.x}%, ${mouthPosition.y}%)` } 
+            ? { 
+                transform: `translate(${mouthPosition.x}px, ${mouthPosition.y}px) rotate(${mouthPosition.rotation}deg)`,
+                transition: 'transform 0.25s cubic-bezier(0.33, 1, 0.68, 1)' // Power3.out equivalent
+              } 
             : {}
         }
       >
