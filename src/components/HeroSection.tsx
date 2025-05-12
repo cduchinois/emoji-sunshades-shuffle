@@ -19,7 +19,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
       <Cloud size="lg" className="bottom-[15%] right-[15%] opacity-75" animationDelay="9s" />
       <Cloud size="md" className="top-[40%] left-[30%] opacity-60" animationDelay="12s" />
       
-      {/* Emoji Logo */}
+      {/* Emoji Logo with Mouse Tracking */}
       <div className="mb-10 relative z-10">
         <EmojiLogo size="xl" trackMouse={true} />
       </div>

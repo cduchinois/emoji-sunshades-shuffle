@@ -24,6 +24,7 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
   
   const logoRef = useRef<HTMLDivElement>(null);
   const [sunglassesPosition, setSunglassesPosition] = useState({ x: 0, y: 0 });
+  const [mouthPosition, setMouthPosition] = useState({ x: 0, y: 0 });
   
   useEffect(() => {
     if (!trackMouse) return;
@@ -43,12 +44,18 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
       
       // Calculate the maximum movement distance (% of logo size)
       const maxDistance = 5;
+      const mouthMaxDistance = 2; // Less movement for the mouth
       
       // Calculate the new position with limited movement
       const newX = Math.cos(angle) * maxDistance;
       const newY = Math.sin(angle) * maxDistance;
       
+      // Mouth moves with delay and less intensely
+      const mouthX = Math.cos(angle) * mouthMaxDistance;
+      const mouthY = Math.sin(angle) * mouthMaxDistance;
+      
       setSunglassesPosition({ x: newX, y: newY });
+      setMouthPosition({ x: mouthX, y: mouthY });
     };
     
     window.addEventListener('mousemove', handleMouseMove);
@@ -69,10 +76,10 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
         animated && !trackMouse && 'animate-face-bounce'
       )} />
       
-      {/* Sunglasses */}
+      {/* Custom Sunglasses */}
       <div 
         className={cn(
-          'absolute w-[90%] h-[30%] top-[20%] left-[5%] transition-transform duration-200',
+          'absolute w-[90%] h-[35%] top-[20%] left-[5%] transition-transform duration-200',
           animated && !trackMouse && 'animate-sunglasses-rotate'
         )}
         style={
@@ -81,17 +88,27 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
             : {}
         }
       >
-        <div className="absolute w-full h-[20%] bg-emoji-purple rounded-md top-[40%]" />
-        <div className="absolute w-[45%] h-[80%] bg-emoji-purple rounded-full bottom-0 left-0" />
-        <div className="absolute w-[45%] h-[80%] bg-emoji-purple rounded-full bottom-0 right-0" />
+        <img 
+          src="/lovable-uploads/71494e35-0c22-4429-b5bc-6989525f3286.png" 
+          alt="Sunglasses" 
+          className="w-full h-full object-contain"
+        />
       </div>
       
-      {/* Nose */}
-      <div className="absolute w-[10%] h-[10%] bg-emoji-purple rounded-full top-[60%] left-[45%]" />
-      
-      {/* Mouth/Smile */}
-      <div className="absolute w-[30%] h-[15%] bg-emoji-purple rounded-full top-[75%] left-[35%]">
-        <div className="absolute w-[80%] h-[50%] bg-emoji-yellow rounded-full top-0 left-[10%]" />
+      {/* Custom Mouth */}
+      <div 
+        className="absolute w-[40%] h-[30%] top-[65%] left-[30%] transition-transform duration-300"
+        style={
+          trackMouse 
+            ? { transform: `translate(${mouthPosition.x}%, ${mouthPosition.y}%)` } 
+            : {}
+        }
+      >
+        <img 
+          src="/lovable-uploads/d9cb7662-f8bc-4039-85e8-fe0c994726be.png" 
+          alt="Mouth" 
+          className="w-full h-full object-contain"
+        />
       </div>
     </div>
   );
