@@ -37,13 +37,13 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
   // Animation frame reference for smooth interpolation
   const animationRef = useRef<number | null>(null);
   
-  // Constants for movement
-  const SUNGLASSES_FACTOR = 0.6;
-  const MOUTH_FACTOR = 0.4;
-  const MAX_TRANSLATION = 10; // pixels
-  const MAX_SUNGLASSES_ROTATION = 5; // degrees
-  const MAX_MOUTH_ROTATION = 8; // degrees
-  const INTERPOLATION_SPEED = 0.08; // Lower = smoother but slower
+  // Constants for movement - INCREASED for more exaggerated effects
+  const SUNGLASSES_FACTOR = 1.8;  // Increased from 0.6 to 1.8
+  const MOUTH_FACTOR = 1.2;       // Increased from 0.4 to 1.2
+  const MAX_TRANSLATION = 30;     // Increased from 10 to 30 pixels
+  const MAX_SUNGLASSES_ROTATION = 15; // Increased from 5 to 15 degrees
+  const MAX_MOUTH_ROTATION = 20;      // Increased from 8 to 20 degrees
+  const INTERPOLATION_SPEED = 0.1;    // Slightly increased from 0.08 for more responsive movement
   
   // Handle mouse movement to calculate target positions
   useEffect(() => {
@@ -57,8 +57,8 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
       const centerY = rect.top + rect.height / 2;
       
       // Normalized cursor position (-1 to 1)
-      const dx = (e.clientX - centerX) / (window.innerWidth / 2);
-      const dy = (e.clientY - centerY) / (window.innerHeight / 2);
+      const dx = (e.clientX - centerX) / (window.innerWidth / 3); // More sensitive horizontal tracking
+      const dy = (e.clientY - centerY) / (window.innerHeight / 3); // More sensitive vertical tracking
       
       // Update target positions with translation and rotation
       setTargetSunglassesPosition({
