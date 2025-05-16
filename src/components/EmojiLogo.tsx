@@ -12,7 +12,6 @@ interface EmojiLogoProps {
 interface ElementPosition {
   x: number;
   y: number;
-  rotation: number;
 }
 
 const EmojiLogo: React.FC<EmojiLogoProps> = ({ 
@@ -29,18 +28,17 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
   };
   
   const logoRef = useRef<HTMLDivElement>(null);
-  const [expressionPosition, setExpressionPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
-  const [targetExpressionPosition, setTargetExpressionPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
+  const [expressionPosition, setExpressionPosition] = useState<ElementPosition>({ x: 0, y: 0 });
+  const [targetExpressionPosition, setTargetExpressionPosition] = useState<ElementPosition>({ x: 0, y: 0 });
   const [isMouseNearLogo, setIsMouseNearLogo] = useState(false);
   
   // Animation frame reference for smooth interpolation
   const animationRef = useRef<number | null>(null);
   
   // Constants for movement - Adjusted for extremely quick/sharp movements
-  const EXPRESSION_FACTOR = 3.0;      // Even more exaggerated movement
-  const MAX_TRANSLATION = 45;        // Increased max translation
-  const MAX_ROTATION = 25;           // Increased max rotation
-  const INTERPOLATION_SPEED = 0.35;  // Faster interpolation for quicker response
+  const EXPRESSION_FACTOR = 3.0;      // Exaggerated movement
+  const MAX_TRANSLATION = 45;         // Maximum translation
+  const INTERPOLATION_SPEED = 0.35;   // Faster interpolation for quicker response
   const RESET_INTERPOLATION_SPEED = 0.2; // Faster reset when mouse leaves
   
   // Detection area around the logo (multiplier of logo dimensions)
@@ -72,21 +70,20 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
         const dx = (e.clientX - centerX) / (rect.width / 2); 
         const dy = (e.clientY - centerY) / (rect.height / 2);
         
-        // Update target positions with translation and rotation
+        // Update target positions with translation only (no rotation)
         setTargetExpressionPosition({
           x: dx * MAX_TRANSLATION * EXPRESSION_FACTOR,
-          y: dy * MAX_TRANSLATION * EXPRESSION_FACTOR,
-          rotation: dx * MAX_ROTATION * EXPRESSION_FACTOR
+          y: dy * MAX_TRANSLATION * EXPRESSION_FACTOR
         });
       } else {
         // Reset position when mouse is outside detection area
-        setTargetExpressionPosition({ x: 0, y: 0, rotation: 0 });
+        setTargetExpressionPosition({ x: 0, y: 0 });
       }
     };
     
     const handleMouseLeave = () => {
       setIsMouseNearLogo(false);
-      setTargetExpressionPosition({ x: 0, y: 0, rotation: 0 });
+      setTargetExpressionPosition({ x: 0, y: 0 });
     };
     
     window.addEventListener('mousemove', handleMouseMove);
@@ -111,8 +108,7 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
       
       setExpressionPosition(prev => ({
         x: prev.x + (targetExpressionPosition.x - prev.x) * speed,
-        y: prev.y + (targetExpressionPosition.y - prev.y) * speed,
-        rotation: prev.rotation + (targetExpressionPosition.rotation - prev.rotation) * speed
+        y: prev.y + (targetExpressionPosition.y - prev.y) * speed
       }));
       
       animationRef.current = requestAnimationFrame(animate);
@@ -146,9 +142,9 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
         className="absolute w-full h-full top-0 left-0"
         style={{ 
           transform: trackMouse 
-            ? `translate(${expressionPosition.x}px, ${expressionPosition.y}px) rotate(${expressionPosition.rotation}deg)` 
+            ? `translate(${expressionPosition.x}px, ${expressionPosition.y}px)` 
             : 'none',
-          transition: 'transform 0.1s cubic-bezier(0.33, 1, 0.68, 1)' // Even faster, sharper transition
+          transition: 'transform 0.1s cubic-bezier(0.33, 1, 0.68, 1)' // Fast, sharp transition
         }}
       >
         <img 
