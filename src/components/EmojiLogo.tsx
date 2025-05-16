@@ -35,9 +35,9 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
   // Animation frame reference for smooth interpolation
   const animationRef = useRef<number | null>(null);
   
-  // Constants for movement - Adjusted for extremely quick/sharp movements
-  const EXPRESSION_FACTOR = 3.0;      // Exaggerated movement
-  const MAX_TRANSLATION = 45;         // Maximum translation
+  // Constants for movement - Adjusted for controlled movement
+  const EXPRESSION_FACTOR = 2.0;      // Reduced from 3.0 for less exaggerated movement
+  const MAX_TRANSLATION = 25;         // Reduced from 45 to limit how far elements can move out
   const INTERPOLATION_SPEED = 0.35;   // Faster interpolation for quicker response
   const RESET_INTERPOLATION_SPEED = 0.2; // Faster reset when mouse leaves
   
