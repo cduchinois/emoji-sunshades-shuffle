@@ -29,23 +29,19 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
   };
   
   const logoRef = useRef<HTMLDivElement>(null);
-  const [sunglassesPosition, setSunglassesPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
-  const [mouthPosition, setMouthPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
-  const [targetSunglassesPosition, setTargetSunglassesPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
-  const [targetMouthPosition, setTargetMouthPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
+  const [expressionPosition, setExpressionPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
+  const [targetExpressionPosition, setTargetExpressionPosition] = useState<ElementPosition>({ x: 0, y: 0, rotation: 0 });
   const [isMouseNearLogo, setIsMouseNearLogo] = useState(false);
   
   // Animation frame reference for smooth interpolation
   const animationRef = useRef<number | null>(null);
   
-  // Constants for movement - Adjusted for quick/sharp movements
-  const SUNGLASSES_FACTOR = 2.2;  // Increased for sharper movement
-  const MOUTH_FACTOR = 1.5;       // Increased for sharper movement
-  const MAX_TRANSLATION = 35;     // Slightly increased max translation
-  const MAX_SUNGLASSES_ROTATION = 18; // Increased max rotation
-  const MAX_MOUTH_ROTATION = 22;      // Increased max rotation
-  const INTERPOLATION_SPEED = 0.25;   // Increased for quicker movement
-  const RESET_INTERPOLATION_SPEED = 0.15; // Speed when resetting position
+  // Constants for movement - Adjusted for extremely quick/sharp movements
+  const EXPRESSION_FACTOR = 3.0;      // Even more exaggerated movement
+  const MAX_TRANSLATION = 45;        // Increased max translation
+  const MAX_ROTATION = 25;           // Increased max rotation
+  const INTERPOLATION_SPEED = 0.35;  // Faster interpolation for quicker response
+  const RESET_INTERPOLATION_SPEED = 0.2; // Faster reset when mouse leaves
   
   // Detection area around the logo (multiplier of logo dimensions)
   const DETECTION_AREA = 1.5; // Mouse is detected within 1.5x the logo's dimensions
@@ -77,28 +73,20 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
         const dy = (e.clientY - centerY) / (rect.height / 2);
         
         // Update target positions with translation and rotation
-        setTargetSunglassesPosition({
-          x: dx * MAX_TRANSLATION * SUNGLASSES_FACTOR,
-          y: dy * MAX_TRANSLATION * SUNGLASSES_FACTOR,
-          rotation: dx * MAX_SUNGLASSES_ROTATION * SUNGLASSES_FACTOR
-        });
-        
-        setTargetMouthPosition({
-          x: dx * MAX_TRANSLATION * MOUTH_FACTOR,
-          y: dy * MAX_TRANSLATION * MOUTH_FACTOR,
-          rotation: dx * MAX_MOUTH_ROTATION * MOUTH_FACTOR
+        setTargetExpressionPosition({
+          x: dx * MAX_TRANSLATION * EXPRESSION_FACTOR,
+          y: dy * MAX_TRANSLATION * EXPRESSION_FACTOR,
+          rotation: dx * MAX_ROTATION * EXPRESSION_FACTOR
         });
       } else {
         // Reset position when mouse is outside detection area
-        setTargetSunglassesPosition({ x: 0, y: 0, rotation: 0 });
-        setTargetMouthPosition({ x: 0, y: 0, rotation: 0 });
+        setTargetExpressionPosition({ x: 0, y: 0, rotation: 0 });
       }
     };
     
     const handleMouseLeave = () => {
       setIsMouseNearLogo(false);
-      setTargetSunglassesPosition({ x: 0, y: 0, rotation: 0 });
-      setTargetMouthPosition({ x: 0, y: 0, rotation: 0 });
+      setTargetExpressionPosition({ x: 0, y: 0, rotation: 0 });
     };
     
     window.addEventListener('mousemove', handleMouseMove);
@@ -121,16 +109,10 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
       // Use faster interpolation when mouse is near, slower when resetting
       const speed = isMouseNearLogo ? INTERPOLATION_SPEED : RESET_INTERPOLATION_SPEED;
       
-      setSunglassesPosition(prev => ({
-        x: prev.x + (targetSunglassesPosition.x - prev.x) * speed,
-        y: prev.y + (targetSunglassesPosition.y - prev.y) * speed,
-        rotation: prev.rotation + (targetSunglassesPosition.rotation - prev.rotation) * speed
-      }));
-      
-      setMouthPosition(prev => ({
-        x: prev.x + (targetMouthPosition.x - prev.x) * speed,
-        y: prev.y + (targetMouthPosition.y - prev.y) * speed,
-        rotation: prev.rotation + (targetMouthPosition.rotation - prev.rotation) * speed
+      setExpressionPosition(prev => ({
+        x: prev.x + (targetExpressionPosition.x - prev.x) * speed,
+        y: prev.y + (targetExpressionPosition.y - prev.y) * speed,
+        rotation: prev.rotation + (targetExpressionPosition.rotation - prev.rotation) * speed
       }));
       
       animationRef.current = requestAnimationFrame(animate);
@@ -143,7 +125,7 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [trackMouse, targetSunglassesPosition, targetMouthPosition, isMouseNearLogo]);
+  }, [trackMouse, targetExpressionPosition, isMouseNearLogo]);
 
   return (
     <div 
@@ -151,48 +133,27 @@ const EmojiLogo: React.FC<EmojiLogoProps> = ({
       className={cn('relative', sizeClasses[size], className)}
     >
       {/* Face */}
-      <div className={cn(
-        'bg-emoji-yellow w-full h-full rounded-full absolute',
-        animated && !trackMouse && 'animate-face-bounce'
-      )} />
-      
-      {/* Custom Sunglasses */}
-      <div 
-        className={cn(
-          'absolute w-[90%] h-[35%] top-[20%] left-[5%] transition-transform duration-200',
-          animated && !trackMouse && 'animate-sunglasses-rotate'
-        )}
-        style={
-          trackMouse 
-            ? { 
-                transform: `translate(${sunglassesPosition.x}px, ${sunglassesPosition.y}px) rotate(${sunglassesPosition.rotation}deg)`,
-                transition: 'transform 0.15s cubic-bezier(0.33, 1, 0.68, 1)' // Faster transition
-              } 
-            : {}
-        }
-      >
+      <div className="w-full h-full rounded-full absolute">
         <img 
-          src="/lovable-uploads/71494e35-0c22-4429-b5bc-6989525f3286.png" 
-          alt="Sunglasses" 
+          src="/lovable-uploads/ae451c53-1760-477b-9394-05fa0af61be8.png" 
+          alt="Emoji Face" 
           className="w-full h-full object-contain"
         />
       </div>
       
-      {/* Custom Mouth */}
+      {/* Expression (combined sunglasses and mouth) */}
       <div 
-        className="absolute w-[40%] h-[30%] top-[65%] left-[30%]"
-        style={
-          trackMouse 
-            ? { 
-                transform: `translate(${mouthPosition.x}px, ${mouthPosition.y}px) rotate(${mouthPosition.rotation}deg)`,
-                transition: 'transform 0.15s cubic-bezier(0.33, 1, 0.68, 1)' // Faster transition
-              } 
-            : {}
-        }
+        className="absolute w-full h-full top-0 left-0"
+        style={{ 
+          transform: trackMouse 
+            ? `translate(${expressionPosition.x}px, ${expressionPosition.y}px) rotate(${expressionPosition.rotation}deg)` 
+            : 'none',
+          transition: 'transform 0.1s cubic-bezier(0.33, 1, 0.68, 1)' // Even faster, sharper transition
+        }}
       >
         <img 
-          src="/lovable-uploads/d9cb7662-f8bc-4039-85e8-fe0c994726be.png" 
-          alt="Mouth" 
+          src="/lovable-uploads/780263d9-ca33-48b8-9450-6cd9b9181293.png" 
+          alt="Expression" 
           className="w-full h-full object-contain"
         />
       </div>
